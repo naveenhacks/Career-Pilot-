@@ -1,8 +1,7 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { UserProfile, AnalysisResult } from '../types';
 
-// NOTE: In a real production app, this key should be proxy-served or strictly environment-managed.
-// Here we assume process.env.API_KEY is available as per instructions.
+// NOTE: Using process.env.API_KEY as per guidelines
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export const analyzeProfile = async (profile: UserProfile): Promise<AnalysisResult> => {
