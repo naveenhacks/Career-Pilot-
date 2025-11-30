@@ -62,14 +62,14 @@ const App: React.FC = () => {
       }
 
       if (data) {
-        // Hydrate state from DB
+        // Hydrate state from DB - handle potential nulls safely
         const profile: UserProfile = {
-          name: data.name,
-          email: data.email,
-          education: data.education,
-          skills: data.skills,
-          interests: data.interests,
-          resumeText: data.resume_text,
+          name: data.name || '',
+          email: data.email || '',
+          education: data.education || '',
+          skills: data.skills || '',
+          interests: data.interests || '',
+          resumeText: data.resume_text || '',
         };
         setUserProfile(profile);
         
@@ -77,8 +77,7 @@ const App: React.FC = () => {
           setAnalysisData(data.analysis_data);
           setView(AppView.DASHBOARD);
         } else {
-          // Profile exists but no analysis? Go to dashboard or onboarding?
-          // Let's assume incomplete profile if no analysis
+          // Profile exists but no analysis? Go to onboarding but pre-fill data
           setView(AppView.ONBOARDING);
         }
       } else {
@@ -112,7 +111,6 @@ const App: React.FC = () => {
       
       if (error) {
         console.error("Supabase upsert error:", error);
-        // Fallback: If table doesn't exist, we just ignore so the app still works in demo mode
       }
     } catch (err) {
       console.error("Save to Supabase failed:", err);
@@ -170,12 +168,13 @@ const App: React.FC = () => {
           />
         );
       case AppView.ONBOARDING:
-        return <Onboarding onSubmit={handleStartAnalysis} isLoading={isLoading} />;
+        // Pass userProfile as initialProfile to pre-fill the form if data exists
+        return <Onboarding onSubmit={handleStartAnalysis} isLoading={isLoading} initialProfile={userProfile} />;
       case AppView.DASHBOARD:
         return analysisData && userProfile ? (
           <Dashboard data={analysisData} userProfile={userProfile} setView={setView} />
         ) : (
-          <Onboarding onSubmit={handleStartAnalysis} isLoading={isLoading} />
+          <Onboarding onSubmit={handleStartAnalysis} isLoading={isLoading} initialProfile={userProfile} />
         );
       case AppView.PRICING:
         return <Pricing />;

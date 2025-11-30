@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Icons } from './Icons';
 import { UserProfile } from '../types';
 import { SkillSelector } from './SkillSelector';
@@ -6,9 +6,10 @@ import { SkillSelector } from './SkillSelector';
 interface OnboardingProps {
   onSubmit: (profile: UserProfile) => void;
   isLoading: boolean;
+  initialProfile?: UserProfile | null;
 }
 
-export const Onboarding: React.FC<OnboardingProps> = ({ onSubmit, isLoading }) => {
+export const Onboarding: React.FC<OnboardingProps> = ({ onSubmit, isLoading, initialProfile }) => {
   const [step, setStep] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const [profile, setProfile] = useState<UserProfile>({
@@ -19,6 +20,15 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onSubmit, isLoading }) =
     interests: '',
     resumeText: ''
   });
+
+  // Populate form if initial data exists (e.g. returning user)
+  useEffect(() => {
+    if (initialProfile) {
+      setProfile(initialProfile);
+      // If we have data, we can optionally advance steps or just let them review
+      // For now, let's keep them at step 1 so they can review their info
+    }
+  }, [initialProfile]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setProfile({ ...profile, [e.target.name]: e.target.value });
@@ -98,7 +108,9 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onSubmit, isLoading }) =
 
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold text-white">Profile Setup</h2>
+            <h2 className="text-2xl font-bold text-white">
+              {initialProfile?.name ? 'Welcome Back' : 'Profile Setup'}
+            </h2>
             <span className="text-blue-400 font-mono">Step {step}/3</span>
           </div>
           <div className="w-full bg-slate-700 h-2 rounded-full overflow-hidden">
@@ -107,6 +119,11 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onSubmit, isLoading }) =
               style={{ width: `${progress}%` }}
             ></div>
           </div>
+          {initialProfile?.name && (
+             <p className="text-sm text-gray-400 mt-2">
+               We found your previous details. Please review and continue to analysis.
+             </p>
+          )}
         </div>
 
         <form onSubmit={handleSubmit}>
